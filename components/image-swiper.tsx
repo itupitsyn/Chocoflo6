@@ -77,6 +77,7 @@ export const ImageSwiper: FC<ImageSwiperProps> = ({ images }) => {
         spaceBetween={5}
         slidesPerView={1}
         onActiveIndexChange={(swiper) => setActiveSlide(swiper.activeIndex)}
+        initialSlide={activeSlide}
         style={
           {
             '--swiper-pagination-color': 'var(--color-fuchsia-700)',

@@ -1,9 +1,9 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { PlusIcon } from 'lucide-react';
+import { EditIcon } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useCallback, useEffect, useState } from 'react';
+import { FC, useCallback, useEffect, useState } from 'react';
 import { Controller, SubmitHandler, useFieldArray, useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import z from 'zod';
@@ -21,25 +21,32 @@ import {
 } from '@/components/ui/dialog';
 import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
-import { addProductAction } from '@/lib/actions/add-product-action';
-import { addProductInputSchema } from '@/lib/schemas/add-product-schema';
+import { editProductAction } from '@/lib/actions/edit-product-action';
+import { Product } from '@/lib/generated/prisma/client';
+import { editProductInputSchema } from '@/lib/schemas/edit-product-schema';
+import { getImageUrl } from '@/lib/utils';
 
 import { ImageUploader } from './ui/image-uploader';
 import { InputGroup, InputGroupAddon, InputGroupText, InputGroupTextarea } from './ui/input-group';
 
-const FORM_ID = 'add-product-form';
+const FORM_ID = 'edit-product-form';
 
-export function AddProductForm() {
+interface EditProductFormProps {
+  product: Pick<Product, 'id' | 'name' | 'images' | 'description'>;
+}
+
+export const EditProductForm: FC<EditProductFormProps> = ({ product }) => {
   const { refresh } = useRouter();
   const [isOpen, setIsOpen] = useState(false);
 
-  const methods = useForm<z.infer<typeof addProductInputSchema>>({
+  const methods = useForm<z.infer<typeof editProductInputSchema>>({
     defaultValues: {
-      description: '',
-      images: [],
-      name: '',
+      id: product.id,
+      description: product.description || '',
+      images: product.images.map((item, idx) => ({ id: idx + 1, src: item, uploaded: true })),
+      name: product.name,
     },
-    resolver: zodResolver(addProductInputSchema),
+    resolver: zodResolver(editProductInputSchema),
   });
 
   const {
@@ -51,17 +58,26 @@ export function AddProductForm() {
 
   const { append, remove, fields: imgFields } = useFieldArray({ control, name: 'images', keyName: 'id' });
 
-  const onSubmit: SubmitHandler<z.infer<typeof addProductInputSchema>> = useCallback(
+  const onSubmit: SubmitHandler<z.infer<typeof editProductInputSchema>> = useCallback(
     async (data) => {
       try {
-        const response = await addProductAction(data);
+        const response = await editProductAction(data);
         if (response.serverError) {
           console.error(response.serverError);
           toast.error(response.serverError);
           return;
         }
+
+        const { data: newData } = response;
+        if (newData) {
+          reset({
+            id: newData.id,
+            description: newData.description || '',
+            images: newData.images.map((item, idx) => ({ id: idx + 1, src: item, uploaded: true })),
+            name: newData.name,
+          });
+        }
         setIsOpen(false);
-        reset();
         refresh();
       } catch (e) {
         console.error(e);
@@ -80,8 +96,8 @@ export function AddProductForm() {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" size="icon-lg">
-          <PlusIcon />
+        <Button variant="outline" size="icon-sm">
+          <EditIcon />
         </Button>
       </DialogTrigger>
 
@@ -143,13 +159,17 @@ export function AddProductForm() {
                   <Field data-invalid={fieldState.invalid} className="gap-2">
                     <FieldLabel htmlFor={field.name}>Изображения</FieldLabel>
                     <ImageUploader
-                      images={imgFields.map((item) => ({ ...item, uploaded: false }))}
+                      images={imgFields.map((item) => ({
+                        ...item,
+                        src: item.uploaded ? (getImageUrl(item.src) ?? '') : item.src,
+                      }))}
                       onDrop={(data) => {
                         data.forEach((file) =>
                           append({
                             id: Math.random(),
                             src: window.URL.createObjectURL(file),
                             file,
+                            uploaded: false,
                           }),
                         );
                       }}
@@ -161,7 +181,24 @@ export function AddProductForm() {
                       }}
                     />
 
-                    {fieldState.invalid && <FieldError errors={errors.images?.map?.((item) => item?.file)} />}
+                    {!!errors.images?.length && (
+                      <FieldError
+                        errors={
+                          errors.images
+                            .filter?.((item) => item && 'file' in item)
+                            ?.map((item) =>
+                              item &&
+                              'file' in item &&
+                              item.file &&
+                              typeof item.file === 'object' &&
+                              'message' in item.file &&
+                              typeof item.file.message === 'string'
+                                ? { message: item.file.message }
+                                : { message: '' },
+                            ) ?? []
+                        }
+                      />
+                    )}
                   </Field>
                 );
               }}
@@ -174,10 +211,10 @@ export function AddProductForm() {
             <Button variant="outline">Отмена</Button>
           </DialogClose>
           <Button form={FORM_ID} disabled={isSubmitting} type="submit">
-            Добавить
+            Сохранить
           </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
-}
+};

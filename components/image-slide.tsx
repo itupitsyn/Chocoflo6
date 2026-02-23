@@ -4,8 +4,7 @@ import { Ghost } from 'lucide-react';
 import Image from 'next/image';
 import { FC, useEffect, useState } from 'react';
 
-import { cn } from '@/lib/utils';
-import { getImageUrl } from '@/lib/utils/get-image-url';
+import { cn, getImageUrl } from '@/lib/utils';
 
 interface ImgSlideProps {
   image: string;

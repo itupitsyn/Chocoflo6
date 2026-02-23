@@ -2,9 +2,7 @@
 
 import z from 'zod';
 
-import { verifyTelegramAuth } from '@/lib/utils/telegram-auth';
-
-import { isAdmin as isAdminChecker } from '../utils/is-admin';
+import { isAdmin as isAdminChecker, verifyTelegramAuth } from '../utils';
 import { actionClient } from './safe-action';
 
 const inputSchema = z.object({

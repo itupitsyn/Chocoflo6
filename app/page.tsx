@@ -1,25 +1,29 @@
 import { cookies } from 'next/headers';
 
 import { AddProductForm } from '@/components/add-porduct-form';
+import { EditProductForm } from '@/components/edit-product-form';
 import { ImageSwiper } from '@/components/image-swiper';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { TG_COOKIES } from '@/lib/constants/cookies';
-import { isAdmin } from '@/lib/utils/is-admin';
-import prisma from '@/lib/utils/prisma';
+import { isAdmin } from '@/lib/utils';
+import prisma from '@/prisma/prisma';
 
 export default async function Page() {
+  const vals = await cookies();
+  const initData = vals.get(TG_COOKIES)?.value;
+  const canEdit = isAdmin(initData);
+
   const data = await prisma.product.findMany({
     include: {
       variants: true,
     },
     where: {
-      isPublished: true,
+      isPublished: canEdit ? undefined : true,
+    },
+    orderBy: {
+      updatedAt: 'desc',
     },
   });
-
-  const vals = await cookies();
-  const initData = vals.get(TG_COOKIES)?.value;
-  const canEdit = isAdmin(initData);
 
   return (
     <main className="container mt-10 mb-20">
@@ -33,6 +37,15 @@ export default async function Page() {
           <Card key={item.id}>
             <CardHeader>
               <CardTitle>{item.name}</CardTitle>
+
+              {canEdit && (
+                <CardAction>
+                  <EditProductForm
+                    product={{ id: item.id, description: item.description, images: item.images, name: item.name }}
+                  />
+                </CardAction>
+              )}
+
               <CardDescription />
             </CardHeader>
 

@@ -7,7 +7,6 @@ const nextConfig: NextConfig = {
     serverActions: {
       bodySizeLimit: '1000MB',
     },
-    serverComponentsExternalPackages: ['@react-pdf/renderer'],
   },
   turbopack: {
     rules: {

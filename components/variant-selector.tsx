@@ -4,7 +4,7 @@ import { FC, useId } from 'react';
 import Select from 'react-select';
 
 import { Variant } from '@/lib/generated/prisma/client';
-import { getSelectClassNames } from '@/lib/utils/get-select-classnames';
+import { getSelectClassNames } from '@/lib/utils';
 
 import { formatPrice } from './format-price';
 

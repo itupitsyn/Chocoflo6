@@ -6,7 +6,7 @@ import { Geist, Geist_Mono } from 'next/font/google';
 import { AuthProtection } from '@/components/auth-protection';
 import { TgProvider } from '@/components/tg-provider';
 import { Toaster } from '@/components/ui/sonner';
-import { cn } from '@/lib/utils/cn';
+import { cn } from '@/lib/utils';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
