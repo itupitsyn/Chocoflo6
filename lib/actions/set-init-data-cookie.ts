@@ -1,9 +1,9 @@
 'use server';
 
 import { cookies } from 'next/headers';
-import { returnValidationErrors } from 'next-safe-action';
 import z from 'zod';
 
+import { TG_COOKIES } from '../constants/cookies';
 import { actionClient } from './safe-action';
 
 const inputSchema = z.object({
@@ -11,18 +11,12 @@ const inputSchema = z.object({
 });
 
 export const setInitTgCookie = actionClient.inputSchema(inputSchema).action(async ({ parsedInput: { initData } }) => {
-  try {
-    (await cookies()).set('tg-init-data', initData, {
-      httpOnly: true,
-      maxAge: 86400,
-      sameSite: 'lax',
-      secure: true,
-    });
-  } catch (error) {
-    console.error(error);
+  const cks = await cookies();
 
-    return returnValidationErrors(inputSchema, {
-      _errors: [error instanceof Error ? error.message : String(error)],
-    });
-  }
+  cks.set(TG_COOKIES, initData, {
+    httpOnly: true,
+    maxAge: 86400,
+    sameSite: 'lax',
+    secure: true,
+  });
 });

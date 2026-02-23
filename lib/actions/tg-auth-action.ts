@@ -1,10 +1,10 @@
 'use server';
 
-import { returnValidationErrors } from 'next-safe-action';
 import z from 'zod';
 
 import { verifyTelegramAuth } from '@/lib/utils/telegram-auth';
 
+import { isAdmin as isAdminChecker } from '../utils/is-admin';
 import { actionClient } from './safe-action';
 
 const inputSchema = z.object({
@@ -14,16 +14,16 @@ const inputSchema = z.object({
 export const tgAuthAction = actionClient.inputSchema(inputSchema).action(async ({ parsedInput: { initData } }) => {
   try {
     const isOk = await verifyTelegramAuth(initData);
+    const isAdmin = isOk ? isAdminChecker(initData) : false;
 
-    return { isOk };
+    return { isOk, isAdmin };
   } catch (error) {
     console.error(error);
 
     return {
       isOk: false,
-      errors: returnValidationErrors(inputSchema, {
-        _errors: [error instanceof Error ? error.message : String(error)],
-      }),
+      isAdmin: false,
+      error,
     };
   }
 });

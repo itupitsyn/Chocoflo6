@@ -9,17 +9,19 @@ import { tgAuthAction } from '@/lib/actions/tg-auth-action';
 type TgContextType = {
   isReady: boolean;
   isOk: boolean;
+  isAdmin: boolean;
   isTg: boolean;
 };
 
-const TgContext = createContext<TgContextType>({ isReady: false, isOk: false, isTg: false });
+const TgContext = createContext<TgContextType>({ isReady: false, isOk: false, isTg: false, isAdmin: false });
 
 export const TgProvider: FC<PropsWithChildren> = ({ children }) => {
   const [isReady, setIsReady] = useState(false);
   const [isOk, setIsOk] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [isTg, setIsTg] = useState(false);
 
-  const value = useMemo(() => ({ isReady, isOk, isTg }), [isReady, isOk, isTg]);
+  const value = useMemo(() => ({ isReady, isOk, isAdmin, isTg }), [isReady, isOk, isTg, isAdmin]);
 
   return (
     <TgContext.Provider value={value}>
@@ -33,6 +35,7 @@ export const TgProvider: FC<PropsWithChildren> = ({ children }) => {
           if (initData) {
             setIsTg(!!tg.initData);
             setIsOk(!!data?.isOk);
+            setIsAdmin(!!data?.isAdmin);
             tg.ready();
             tg.expand();
           }

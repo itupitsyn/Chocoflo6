@@ -2,10 +2,14 @@ export async function verifyTelegramAuth(initData: string): Promise<boolean> {
   const botToken = process.env['BOT_TOKEN'];
   const decodedData = decodeURIComponent(initData);
   const urlParams = new URLSearchParams(decodedData);
+
   const hash = urlParams.get('hash');
+
   urlParams.delete('hash');
 
-  if (!hash) return false;
+  if (!hash) {
+    return false;
+  }
 
   const dataCheckString = Array.from(urlParams.entries())
     .map(([key, value]) => `${key}=${value}`)
