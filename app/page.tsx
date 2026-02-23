@@ -1,6 +1,8 @@
 import { cookies } from 'next/headers';
 
 import { AddProductForm } from '@/components/add-porduct-form';
+import { ChangeProductVisibilityButton } from '@/components/change-product-visibility-button';
+import { DeleteProductButton } from '@/components/delete-product-button';
 import { EditProductForm } from '@/components/edit-product-form';
 import { ImageSwiper } from '@/components/image-swiper';
 import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -40,9 +42,15 @@ export default async function Page() {
 
               {canEdit && (
                 <CardAction>
-                  <EditProductForm
-                    product={{ id: item.id, description: item.description, images: item.images, name: item.name }}
-                  />
+                  <div className="flex gap-2">
+                    <DeleteProductButton id={item.id} />
+
+                    <ChangeProductVisibilityButton id={item.id} isPublished={item.isPublished} />
+
+                    <EditProductForm
+                      product={{ id: item.id, description: item.description, images: item.images, name: item.name }}
+                    />
+                  </div>
                 </CardAction>
               )}
 
