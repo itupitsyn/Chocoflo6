@@ -26,8 +26,6 @@ export const editProductAction = authActionClient
       },
     });
 
-    console.log(oldItem?.images);
-
     if (oldItem) {
       const oldFiles = images?.filter((item) => item.uploaded).map((item) => item.src) ?? [];
       const filesToDelete: string[] = [];

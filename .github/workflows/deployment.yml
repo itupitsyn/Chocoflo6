@@ -1,0 +1,62 @@
+name: Deploy to prod
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and Save Image (Compressed)
+        run: |
+          docker build -t asya-sweets .
+          # Сжимаем образ "на лету" для уменьшения размера файла
+          docker save asya-sweets | gzip > asya-sweets.tar.gz
+
+      - name: Copy image to VDS
+        uses: appleboy/scp-action@v1.0.0
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          password: ${{ secrets.PASSWORD }}
+          port: 52
+          source: "asya-sweets.tar.gz"
+          target: "/tmp"
+
+      - name: Load and Restart with Bun
+        uses: appleboy/ssh-action@v1.1.0
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          password: ${{ secrets.PASSWORD }}
+          port: 52
+          script: |
+            # Распаковываем и загружаем образ
+            zcat /tmp/asya-sweets.tar.gz | docker load
+            
+            # Удаляем старый контейнер
+            docker stop asya-sweets || true
+            docker rm asya-sweets || true
+            
+            # Запускаем новый
+            docker run -d \
+              -p 3600:3000 \
+              --name asya-sweets \
+              --restart always \
+              -e BOT_TOKEN=${{ secrets.BOT_TOKEN }} \
+              -e DATABASE_URL=${{ secrets.DATABASE_URL }} \
+              -e PATH_TO_FILES=${{ secrets.PATH_TO_FILES }} \
+              -e ADMIN_ID=${{ secrets.ADMIN_ID }} \
+              -v /root/apps/asya-sweets-imgs:/images \
+              asya-sweets
+            
+            # Очистка
+            rm /tmp/asya-sweets.tar.gz
+            docker image prune -f
