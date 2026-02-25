@@ -15,12 +15,17 @@ export const ImgSlide: FC<ImgSlideProps> = ({ image, isFS }) => {
   const [img, setImg] = useState<string>(getImageUrl(image) || '');
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setImg(getImageUrl(image) || '');
+    const timeoutId = setTimeout(() => {
+      setImg(getImageUrl(image) || '');
+    }, 0);
+
+    return () => {
+      clearTimeout(timeoutId);
+    };
   }, [image]);
 
   return (
-    <div className={cn('relative', isFS ? 'h-svh' : 'h-60')}>
+    <div className={cn('relative aspect-square min-w-0 flex-[0_0_100%]', isFS ? 'h-svh' : 'h-60')}>
       {img ? (
         <Image
           src={img}
@@ -30,9 +35,9 @@ export const ImgSlide: FC<ImgSlideProps> = ({ image, isFS }) => {
           onError={() => {
             setImg('');
           }}
-          unoptimized={isFS}
+          quality={85}
           className={cn('size-full', isFS ? 'object-contain' : 'object-cover')}
-          sizes="(max-width: 768px) 100vw, 33vw"
+          sizes={isFS ? '100vw' : '(max-width: 768px) 100vw, 33vw'}
         />
       ) : (
         <div className="flex h-full items-center justify-center bg-white">
