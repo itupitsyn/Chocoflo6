@@ -65,7 +65,7 @@ export const ImageUploader: FC<ImageUploaderProps> = ({ images, isDisabled, isLo
           {images.map((item) => (
             <div key={item.id} className="relative border border-dashed">
               {item.src ? (
-                <Image src={item.src} alt="" unoptimized width={192} height={192} className="size-24 object-contain" />
+                <Image src={item.src} alt="" width={192} height={192} className="size-24 object-contain" quality={85} />
               ) : (
                 <div className="flex size-24 items-center justify-center">
                   {!isLoading && <Ghost className="size-6 object-contain" />}
