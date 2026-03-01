@@ -26,7 +26,6 @@ jobs:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.PASSWORD }}
-          port: 52
           source: "asya-sweets.tar.gz"
           target: "/tmp"
 
@@ -36,7 +35,6 @@ jobs:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.PASSWORD }}
-          port: 52
           script: |
             # Распаковываем и загружаем образ
             zcat /tmp/asya-sweets.tar.gz | docker load
@@ -47,8 +45,9 @@ jobs:
             
             # Запускаем новый
             docker run -d \
-              -p 3600:3000 \
+              -p 3000:3000 \
               --name asya-sweets \
+              --network asya-sweets-network \
               --restart always \
               -e BOT_TOKEN=${{ secrets.BOT_TOKEN }} \
               -e DATABASE_URL=${{ secrets.DATABASE_URL }} \
