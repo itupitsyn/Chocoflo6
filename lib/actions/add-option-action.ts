@@ -2,13 +2,13 @@
 
 import prisma from '@/prisma/prisma';
 
-import { addProductInputSchema } from '../schemas/add-product-schema';
+import { addOptionInputSchema } from '../schemas/add-option-schema';
 import { saveImagesToFiles } from '../utils';
 import { authActionClient } from './safe-action';
 
-export const addProductAction = authActionClient
-  .inputSchema(addProductInputSchema)
-  .action(async ({ parsedInput: { description, name, images, code } }) => {
+export const addOptionAction = authActionClient
+  .inputSchema(addOptionInputSchema)
+  .action(async ({ parsedInput: { name, price, images } }) => {
     const fileNames: string[] = [];
     if (images?.length) {
       const result = await saveImagesToFiles(images?.map((item) => item.file));
@@ -19,14 +19,13 @@ export const addProductAction = authActionClient
       });
     }
 
-    const data = await prisma.product.create({
+    const data = await prisma.option.create({
       data: {
         name,
-        description,
-        code,
+        price,
         images: fileNames,
       },
     });
 
-    return data;
+    return { ...data, price: data.price.toNumber() };
   });

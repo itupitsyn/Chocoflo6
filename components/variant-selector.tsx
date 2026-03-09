@@ -6,7 +6,7 @@ import Select from 'react-select';
 import { Variant } from '@/lib/generated/prisma/client';
 import { getSelectClassNames } from '@/lib/utils';
 
-import { formatPrice } from './format-price';
+import { formatPrice } from '../lib/utils';
 
 interface VariantSelectorProps {
   variants: (Omit<Variant, 'price'> & { price: number })[];

@@ -1,28 +1,11 @@
 import z from 'zod';
 
-import { IMG_FORMATS, MAX_IMG_SIZE } from '../constants/images';
+import { itemEditImageArraySchema } from './image-schema';
 
 export const editProductInputSchema = z.object({
   id: z.string(),
   name: z.string().max(128, { error: 'Максимальная длина 128' }).min(1, { error: 'Обязательное поле' }),
+  code: z.string().max(128, { message: 'Максимальная длина 128' }).nullable(),
   description: z.string().max(1024, { error: 'Максимальная длина 1024' }).min(1, { error: 'Обязательное поле' }),
-  images: z
-    .union([
-      z.object({
-        id: z.number(),
-        src: z.string(),
-        file: z
-          .any()
-          .refine((file) => file?.size <= MAX_IMG_SIZE, `Максимальный размер картинки ${MAX_IMG_SIZE / 1024 / 1024}МБ`)
-          .refine((file) => IMG_FORMATS.includes(file?.type), 'Только форматы .jpg, .jpeg, .png и .webp'),
-        uploaded: z.literal(false),
-      }),
-      z.object({
-        id: z.number(),
-        src: z.string(),
-        uploaded: z.literal(true),
-      }),
-    ])
-    .array()
-    .optional(),
+  images: itemEditImageArraySchema,
 });

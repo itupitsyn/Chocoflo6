@@ -3,43 +3,19 @@
 import prisma from '@/prisma/prisma';
 
 import { editProductInputSchema } from '../schemas/edit-product-schema';
-import { saveImagesToFiles } from '../utils';
-import { deleteFiles } from '../utils/delete-files';
+import { updateFiles } from '../utils';
 import { authActionClient } from './safe-action';
 
 export const editProductAction = authActionClient
   .inputSchema(editProductInputSchema)
-  .action(async ({ parsedInput: { description, name, images, id } }) => {
-    const fileNames: string[] = [];
-    const newFiles = images?.filter((item) => 'file' in item) ?? [];
-
-    const result = await saveImagesToFiles(newFiles.map((item) => item.file));
-    result?.forEach((item) => {
-      if (item.status === 'fulfilled' && item.value) {
-        fileNames.push(item.value);
-      }
-    });
-
+  .action(async ({ parsedInput: { description, name, images, id, code } }) => {
     const oldItem = await prisma.product.findFirst({
       where: {
         id,
       },
     });
 
-    if (oldItem) {
-      const oldFiles = images?.filter((item) => item.uploaded).map((item) => item.src) ?? [];
-      const filesToDelete: string[] = [];
-
-      oldItem.images.forEach((item) => {
-        if (!oldFiles.find((fn) => fn === item)) {
-          filesToDelete.push(item);
-        } else {
-          fileNames.push(item);
-        }
-      });
-
-      deleteFiles(filesToDelete);
-    }
+    const fileNames = await updateFiles(images, oldItem?.images);
 
     const data = await prisma.product.update({
       where: {
@@ -48,6 +24,7 @@ export const editProductAction = authActionClient
       data: {
         name,
         description,
+        code,
         images: fileNames,
       },
     });

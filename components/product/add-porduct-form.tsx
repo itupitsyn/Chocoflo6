@@ -1,9 +1,8 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { PlusIcon } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useCallback, useEffect, useState } from 'react';
+import { FC, useCallback, useEffect } from 'react';
 import { Controller, SubmitHandler, useFieldArray, useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import z from 'zod';
@@ -17,21 +16,24 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog';
 import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { addProductAction } from '@/lib/actions/add-product-action';
 import { addProductInputSchema } from '@/lib/schemas/add-product-schema';
 
-import { ImageUploader } from './ui/image-uploader';
-import { InputGroup, InputGroupAddon, InputGroupText, InputGroupTextarea } from './ui/input-group';
+import { ImageUploader } from '../ui/image-uploader';
+import { InputGroup, InputGroupAddon, InputGroupText, InputGroupTextarea } from '../ui/input-group';
 
 const FORM_ID = 'add-product-form';
 
-export function AddProductForm() {
+interface AddProductFormProps {
+  isOpen: boolean;
+  onOpenChange: (isOpen: boolean) => void;
+}
+
+export const AddProductForm: FC<AddProductFormProps> = ({ isOpen, onOpenChange }) => {
   const { refresh } = useRouter();
-  const [isOpen, setIsOpen] = useState(false);
 
   const methods = useForm<z.infer<typeof addProductInputSchema>>({
     defaultValues: {
@@ -60,7 +62,7 @@ export function AddProductForm() {
           toast.error(response.serverError);
           return;
         }
-        setIsOpen(false);
+        onOpenChange(false);
         reset();
         refresh();
       } catch (e) {
@@ -68,7 +70,7 @@ export function AddProductForm() {
         toast.error('Неизвестная ошибка');
       }
     },
-    [refresh, reset],
+    [refresh, reset, onOpenChange],
   );
 
   useEffect(() => {
@@ -78,13 +80,7 @@ export function AddProductForm() {
   }, [isOpen, reset]);
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>
-        <Button variant="outline" size="icon-lg">
-          <PlusIcon />
-        </Button>
-      </DialogTrigger>
-
+    <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="flex max-h-svh flex-col gap-4 overflow-hidden lg:max-w-lg">
         <DialogHeader>
           <DialogTitle>Добавить вкусни</DialogTitle>
@@ -104,6 +100,25 @@ export function AddProductForm() {
                     id={field.name}
                     aria-invalid={fieldState.invalid}
                     placeholder="Название вкусни"
+                    autoComplete="off"
+                  />
+                  {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                </Field>
+              )}
+            />
+
+            <Controller
+              name="code"
+              control={control}
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel htmlFor={field.name}>Артикул</FieldLabel>
+                  <Input
+                    {...field}
+                    value={field.value || ''}
+                    id={field.name}
+                    aria-invalid={fieldState.invalid}
+                    placeholder="Артикул"
                     autoComplete="off"
                   />
                   {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
@@ -180,4 +195,4 @@ export function AddProductForm() {
       </DialogContent>
     </Dialog>
   );
-}
+};
