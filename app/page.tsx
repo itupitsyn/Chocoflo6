@@ -7,7 +7,7 @@ import { EditProductForm } from '@/components/product/edit-product-form';
 import { ImageSwiper } from '@/components/product/image-swiper';
 import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { TG_COOKIES } from '@/lib/constants/cookies';
-import { cn, isAdmin } from '@/lib/utils';
+import { cn, isAdmin, normalizeOption } from '@/lib/utils';
 import prisma from '@/prisma/prisma';
 
 export default async function Page() {
@@ -15,18 +15,35 @@ export default async function Page() {
   const initData = cks.get(TG_COOKIES)?.value;
   const canEdit = isAdmin(initData);
 
-  const data = await prisma.product.findMany({
-    include: {
-      variants: true,
-    },
-    where: {
-      isPublished: canEdit ? undefined : true,
-      deletedAt: null,
-    },
-    orderBy: {
-      updatedAt: 'desc',
-    },
-  });
+  const [data, opts] = await Promise.all([
+    prisma.product.findMany({
+      include: {
+        variants: true,
+        productOptions: {
+          select: {
+            option: true,
+          },
+        },
+      },
+      where: {
+        isPublished: canEdit ? undefined : true,
+        deletedAt: null,
+      },
+      orderBy: {
+        updatedAt: 'desc',
+      },
+    }),
+    canEdit
+      ? prisma.option.findMany({
+          where: {
+            deletedAt: null,
+          },
+          orderBy: {
+            updatedAt: 'desc',
+          },
+        })
+      : [],
+  ]);
 
   return (
     <main className="container mt-5 mb-20">
@@ -35,7 +52,7 @@ export default async function Page() {
 
         {canEdit && (
           <div className="flex justify-end">
-            <AdminMenu />
+            <AdminMenu opts={opts.map(normalizeOption)} />
           </div>
         )}
       </div>
@@ -54,6 +71,11 @@ export default async function Page() {
                     <ChangeProductVisibilityButton id={item.id} isPublished={item.isPublished} />
 
                     <EditProductForm
+                      opts={opts.map(normalizeOption)}
+                      productOptions={item.productOptions.map((optItem) => ({
+                        id: optItem.option.id,
+                        name: optItem.option.name,
+                      }))}
                       product={{
                         id: item.id,
                         description: item.description,

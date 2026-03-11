@@ -8,7 +8,7 @@ import { authActionClient } from './safe-action';
 
 export const addProductAction = authActionClient
   .inputSchema(addProductInputSchema)
-  .action(async ({ parsedInput: { description, name, images, code } }) => {
+  .action(async ({ parsedInput: { description, name, images, options, code } }) => {
     const fileNames: string[] = [];
     if (images?.length) {
       const result = await saveImagesToFiles(images?.map((item) => item.file));
@@ -24,6 +24,9 @@ export const addProductAction = authActionClient
         name,
         description,
         code,
+        productOptions: {
+          create: options?.map((item) => ({ optionId: item.id })),
+        },
         images: fileNames,
       },
     });

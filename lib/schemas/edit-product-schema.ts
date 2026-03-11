@@ -1,6 +1,7 @@
 import z from 'zod';
 
 import { itemEditImageArraySchema } from './image-schema';
+import { optionSchema } from './option-schema';
 
 export const editProductInputSchema = z.object({
   id: z.string(),
@@ -8,4 +9,5 @@ export const editProductInputSchema = z.object({
   code: z.string().max(128, { message: 'Максимальная длина 128' }).nullable(),
   description: z.string().max(1024, { error: 'Максимальная длина 1024' }).min(1, { error: 'Обязательное поле' }),
   images: itemEditImageArraySchema,
+  options: optionSchema.array().optional(),
 });

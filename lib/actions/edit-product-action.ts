@@ -8,7 +8,7 @@ import { authActionClient } from './safe-action';
 
 export const editProductAction = authActionClient
   .inputSchema(editProductInputSchema)
-  .action(async ({ parsedInput: { description, name, images, id, code } }) => {
+  .action(async ({ parsedInput: { description, name, images, id, code, options } }) => {
     const oldItem = await prisma.product.findFirst({
       where: {
         id,
@@ -17,16 +17,44 @@ export const editProductAction = authActionClient
 
     const fileNames = await updateFiles(images, oldItem?.images);
 
-    const data = await prisma.product.update({
-      where: {
-        id,
-      },
-      data: {
-        name,
-        description,
-        code,
-        images: fileNames,
-      },
+    const data = await prisma.$transaction(async (tx) => {
+      await tx.productOption.deleteMany({
+        where: {
+          productId: id,
+        },
+      });
+
+      return tx.product.update({
+        include: {
+          productOptions: {
+            where: {
+              option: {
+                deletedAt: null,
+              },
+            },
+            select: {
+              option: {
+                select: {
+                  id: true,
+                  name: true,
+                },
+              },
+            },
+          },
+        },
+        where: {
+          id,
+        },
+        data: {
+          name,
+          description,
+          code,
+          productOptions: {
+            create: options?.map((item) => ({ optionId: item.id })),
+          },
+          images: fileNames,
+        },
+      });
     });
 
     return data;

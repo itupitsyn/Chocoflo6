@@ -4,6 +4,8 @@ import { Menu } from 'lucide-react';
 import Link from 'next/link';
 import { FC, useState } from 'react';
 
+import { NormalizedOption } from '@/lib/types/options';
+
 import { AddProductForm } from './product/add-porduct-form';
 import { Button } from './ui/button';
 import {
@@ -15,7 +17,11 @@ import {
   DropdownMenuTrigger,
 } from './ui/dropdown-menu';
 
-export const AdminMenu: FC = () => {
+interface AdminMenuProps {
+  opts: NormalizedOption[];
+}
+
+export const AdminMenu: FC<AdminMenuProps> = ({ opts }) => {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
 
   return (
@@ -45,7 +51,7 @@ export const AdminMenu: FC = () => {
           </DropdownMenuGroup>
         </DropdownMenuContent>
       </DropdownMenu>
-      <AddProductForm isOpen={isAddDialogOpen} onOpenChange={setIsAddDialogOpen} />
+      <AddProductForm isOpen={isAddDialogOpen} onOpenChange={setIsAddDialogOpen} opts={opts} />
     </>
   );
 };

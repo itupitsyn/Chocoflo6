@@ -24,18 +24,24 @@ import { Input } from '@/components/ui/input';
 import { editProductAction } from '@/lib/actions/edit-product-action';
 import { Product } from '@/lib/generated/prisma/client';
 import { editProductInputSchema } from '@/lib/schemas/edit-product-schema';
+import { optionSchema } from '@/lib/schemas/option-schema';
+import { NormalizedOption } from '@/lib/types/options';
 import { getImageUrl } from '@/lib/utils';
 
+import { Checkbox } from '../ui/checkbox';
 import { ImageUploader } from '../ui/image-uploader';
 import { InputGroup, InputGroupAddon, InputGroupText, InputGroupTextarea } from '../ui/input-group';
+import { Label } from '../ui/label';
 
 const FORM_ID = 'edit-product-form';
 
 interface EditProductFormProps {
   product: Pick<Product, 'id' | 'name' | 'images' | 'description' | 'code'>;
+  productOptions: z.infer<typeof optionSchema>[];
+  opts: NormalizedOption[];
 }
 
-export const EditProductForm: FC<EditProductFormProps> = ({ product }) => {
+export const EditProductForm: FC<EditProductFormProps> = ({ product, opts, productOptions }) => {
   const { refresh } = useRouter();
   const [isOpen, setIsOpen] = useState(false);
 
@@ -46,6 +52,7 @@ export const EditProductForm: FC<EditProductFormProps> = ({ product }) => {
       images: product.images.map((item, idx) => ({ id: idx + 1, src: item, uploaded: true })),
       name: product.name,
       code: product.code,
+      options: productOptions,
     },
     resolver: zodResolver(editProductInputSchema),
   });
@@ -57,7 +64,17 @@ export const EditProductForm: FC<EditProductFormProps> = ({ product }) => {
     reset,
   } = methods;
 
-  const { append, remove, fields: imgFields } = useFieldArray({ control, name: 'images', keyName: 'id' });
+  const {
+    append: imgAppend,
+    remove: imgRemove,
+    fields: imgFields,
+  } = useFieldArray({ control, name: 'images', keyName: 'id' });
+
+  const {
+    append: optAppend,
+    remove: optRemove,
+    fields: optFields,
+  } = useFieldArray({ control, name: 'options', keyName: 'optId' });
 
   const onSubmit: SubmitHandler<z.infer<typeof editProductInputSchema>> = useCallback(
     async (data) => {
@@ -76,6 +93,7 @@ export const EditProductForm: FC<EditProductFormProps> = ({ product }) => {
             description: newData.description || '',
             images: newData.images.map((item, idx) => ({ id: idx + 1, src: item, uploaded: true })),
             name: newData.name,
+            options: newData.productOptions.map((item) => item.option),
           });
         }
         setIsOpen(false);
@@ -172,6 +190,39 @@ export const EditProductForm: FC<EditProductFormProps> = ({ product }) => {
             />
 
             <Controller
+              name="options"
+              control={control}
+              render={({ field }) => {
+                return (
+                  <FieldGroup className="gap-3! pt-4">
+                    <FieldLabel>Доступные опции</FieldLabel>
+                    {opts.map((item) => {
+                      const optIdx = optFields.findIndex((oItem) => oItem.id === item.id);
+                      const isChecked = optIdx >= 0;
+                      return (
+                        <Field key={item.id} orientation="horizontal">
+                          <Checkbox
+                            id={item.id}
+                            onBlur={field.onBlur}
+                            checked={isChecked}
+                            onClick={() => {
+                              if (isChecked) {
+                                optRemove(optIdx);
+                              } else {
+                                optAppend({ id: item.id, name: item.name });
+                              }
+                            }}
+                          />
+                          <Label htmlFor={item.id}>{item.name}</Label>
+                        </Field>
+                      );
+                    })}
+                  </FieldGroup>
+                );
+              }}
+            />
+
+            <Controller
               name="images"
               control={control}
               render={({ field, fieldState }) => {
@@ -185,7 +236,7 @@ export const EditProductForm: FC<EditProductFormProps> = ({ product }) => {
                       }))}
                       onDrop={(data) => {
                         data.forEach((file) =>
-                          append({
+                          imgAppend({
                             id: Math.random(),
                             src: window.URL.createObjectURL(file),
                             file,
@@ -196,7 +247,7 @@ export const EditProductForm: FC<EditProductFormProps> = ({ product }) => {
                       onDelete={(img) => {
                         const idx = imgFields.findIndex((item) => item.id === img.id);
                         if (idx >= 0) {
-                          remove(idx);
+                          imgRemove(idx);
                         }
                       }}
                     />
