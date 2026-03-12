@@ -3,7 +3,7 @@
 import prisma from '@/prisma/prisma';
 
 import { editOptionInputSchema } from '../schemas/edit-option-schema';
-import { normalizeOption, updateFiles } from '../utils';
+import { normalizePrice, updateFiles } from '../utils';
 import { authActionClient } from './safe-action';
 
 export const editOptionAction = authActionClient
@@ -28,5 +28,5 @@ export const editOptionAction = authActionClient
       },
     });
 
-    return normalizeOption(data);
+    return normalizePrice(data);
   });

@@ -6,7 +6,6 @@ import { isAdmin, verifyTelegramAuth } from '../utils';
 
 export const actionClient = createSafeActionClient({
   handleServerError(e) {
-    // Если это наша кастомная ошибка — отдаем её текст
     if (e instanceof Error) {
       return e.message;
     }
@@ -17,7 +16,7 @@ export const actionClient = createSafeActionClient({
 export const authActionClient = actionClient.use(async ({ next }) => {
   const cks = await cookies();
   const initData = cks.get(TG_COOKIES);
-  const isOk = await verifyTelegramAuth(initData?.value ?? '');
+  const isOk = await verifyTelegramAuth(initData?.value);
   const isAdm = isAdmin(initData?.value);
 
   if (!isOk || !isAdm) {

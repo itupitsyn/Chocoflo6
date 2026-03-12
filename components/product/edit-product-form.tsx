@@ -22,10 +22,10 @@ import {
 import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { editProductAction } from '@/lib/actions/edit-product-action';
-import { Product } from '@/lib/generated/prisma/client';
+import { Option, Product } from '@/lib/generated/prisma/client';
 import { editProductInputSchema } from '@/lib/schemas/edit-product-schema';
 import { optionSchema } from '@/lib/schemas/option-schema';
-import { NormalizedOption } from '@/lib/types/options';
+import { NormalizePrice } from '@/lib/types';
 import { getImageUrl } from '@/lib/utils';
 
 import { Checkbox } from '../ui/checkbox';
@@ -36,9 +36,9 @@ import { Label } from '../ui/label';
 const FORM_ID = 'edit-product-form';
 
 interface EditProductFormProps {
-  product: Pick<Product, 'id' | 'name' | 'images' | 'description' | 'code'>;
+  product: Product;
   productOptions: z.infer<typeof optionSchema>[];
-  opts: NormalizedOption[];
+  opts: NormalizePrice<Option>[];
 }
 
 export const EditProductForm: FC<EditProductFormProps> = ({ product, opts, productOptions }) => {

@@ -9,7 +9,7 @@ import { EditOptionForm } from '@/components/option/edit-option-form';
 import { ImageSwiper } from '@/components/product/image-swiper';
 import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { TG_COOKIES } from '@/lib/constants/cookies';
-import { cn, formatPrice, isAdmin, normalizeOption } from '@/lib/utils';
+import { cn, formatPrice, isAdmin, normalizePrice } from '@/lib/utils';
 import prisma from '@/prisma/prisma';
 
 export default async function Page() {
@@ -42,7 +42,7 @@ export default async function Page() {
 
       <div className="grid grid-cols-[repeat(auto-fit,minmax(300px,1fr))] gap-4 pt-10">
         {data.map((item, idx, list) => (
-          <Card key={item.id} className={cn(list.length < 2 && 'max-w-1/2')}>
+          <Card key={item.id} className={cn(list.length < 2 && 'sm:max-w-1/2')}>
             <CardHeader>
               <CardTitle>{item.name}</CardTitle>
 
@@ -50,7 +50,7 @@ export default async function Page() {
                 <div className="flex gap-2">
                   <DeleteOptionButton id={item.id} />
 
-                  <EditOptionForm option={normalizeOption(item)} />
+                  <EditOptionForm option={normalizePrice(item)} />
                 </div>
               </CardAction>
 

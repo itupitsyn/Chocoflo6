@@ -1,4 +1,8 @@
-export async function verifyTelegramAuth(initData: string): Promise<boolean> {
+export async function verifyTelegramAuth(initData: string | undefined): Promise<boolean> {
+  if (!initData) {
+    return false;
+  }
+
   const botToken = process.env['BOT_TOKEN'];
   const decodedData = decodeURIComponent(initData);
   const urlParams = new URLSearchParams(decodedData);

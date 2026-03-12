@@ -32,11 +32,21 @@ CREATE TABLE "Option" (
 );
 
 -- CreateTable
+CREATE TABLE "User" (
+    "id" INTEGER NOT NULL,
+    "name" TEXT NOT NULL,
+    "userName" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "User_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "Order" (
     "id" SERIAL NOT NULL,
     "userId" INTEGER NOT NULL,
     "status" "OrderStatus" NOT NULL DEFAULT 'CART',
-    "price" DECIMAL(10,2) NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -49,7 +59,6 @@ CREATE TABLE "OrderItem" (
     "productId" TEXT NOT NULL,
     "variantId" TEXT NOT NULL,
     "count" INTEGER NOT NULL,
-    "price" DECIMAL(10,2) NOT NULL,
 
     CONSTRAINT "OrderItem_pkey" PRIMARY KEY ("id")
 );
@@ -69,6 +78,9 @@ ALTER TABLE "ProductOption" ADD CONSTRAINT "ProductOption_productId_fkey" FOREIG
 
 -- AddForeignKey
 ALTER TABLE "ProductOption" ADD CONSTRAINT "ProductOption_optionId_fkey" FOREIGN KEY ("optionId") REFERENCES "Option"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Order" ADD CONSTRAINT "Order_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "OrderItem" ADD CONSTRAINT "OrderItem_productId_fkey" FOREIGN KEY ("productId") REFERENCES "Product"("id") ON DELETE CASCADE ON UPDATE CASCADE;

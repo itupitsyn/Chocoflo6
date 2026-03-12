@@ -20,8 +20,9 @@ import {
 import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { addProductAction } from '@/lib/actions/add-product-action';
+import { Option } from '@/lib/generated/prisma/client';
 import { addProductInputSchema } from '@/lib/schemas/add-product-schema';
-import { NormalizedOption } from '@/lib/types/options';
+import { NormalizePrice } from '@/lib/types';
 
 import { Checkbox } from '../ui/checkbox';
 import { ImageUploader } from '../ui/image-uploader';
@@ -32,7 +33,7 @@ const FORM_ID = 'add-product-form';
 
 interface AddProductFormProps {
   isOpen: boolean;
-  opts: NormalizedOption[];
+  opts: NormalizePrice<Option>[];
   onOpenChange: (isOpen: boolean) => void;
 }
 

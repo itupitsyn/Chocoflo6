@@ -81,11 +81,21 @@ enum OrderStatus {
   CANCELLED // Отменено
 }
 
+model User {
+  id       Int    @id
+  name     String
+  userName String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  orders    Order[]
+}
+
 model Order {
   id     Int         @id @default(autoincrement())
+  user   User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId Int
   status OrderStatus @default(CART)
-  price  Decimal     @db.Decimal(10, 2)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -100,7 +110,6 @@ model OrderItem {
   variantId String
 
   count            Int
-  price            Decimal           @db.Decimal(10, 2)
   orderItemOptions OrderItemOption[]
 }
 

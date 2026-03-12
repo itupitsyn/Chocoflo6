@@ -4,7 +4,8 @@ import { Menu } from 'lucide-react';
 import Link from 'next/link';
 import { FC, useState } from 'react';
 
-import { NormalizedOption } from '@/lib/types/options';
+import { Option } from '@/lib/generated/prisma/client';
+import { NormalizePrice } from '@/lib/types';
 
 import { AddProductForm } from './product/add-porduct-form';
 import { Button } from './ui/button';
@@ -18,7 +19,7 @@ import {
 } from './ui/dropdown-menu';
 
 interface AdminMenuProps {
-  opts: NormalizedOption[];
+  opts: NormalizePrice<Option>[];
 }
 
 export const AdminMenu: FC<AdminMenuProps> = ({ opts }) => {

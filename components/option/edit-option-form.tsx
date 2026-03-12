@@ -22,8 +22,9 @@ import {
 import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { editOptionAction } from '@/lib/actions/edit-option-action';
+import { Option } from '@/lib/generated/prisma/client';
 import { editOptionInputSchema } from '@/lib/schemas/edit-option-schema';
-import { NormalizedOption } from '@/lib/types/options';
+import { NormalizePrice } from '@/lib/types';
 import { getImageUrl } from '@/lib/utils';
 
 import { ImageUploader } from '../ui/image-uploader';
@@ -31,7 +32,7 @@ import { ImageUploader } from '../ui/image-uploader';
 const FORM_ID = 'edit-option-form';
 
 interface EditOptionFormProps {
-  option: NormalizedOption;
+  option: NormalizePrice<Option>;
 }
 
 export const EditOptionForm: FC<EditOptionFormProps> = ({ option }) => {
