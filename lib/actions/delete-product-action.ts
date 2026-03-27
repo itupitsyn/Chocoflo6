@@ -1,12 +1,14 @@
 'use server';
 
+import { revalidatePath } from 'next/cache';
+
 import prisma from '@/prisma/prisma';
 
 import { deleteProductInputSchema } from '../schemas/delete-product-schema';
 import { deleteFiles } from '../utils';
-import { authActionClient } from './safe-action';
+import { adminActionClient } from './safe-action';
 
-export const deleteProductAction = authActionClient
+export const deleteProductAction = adminActionClient
   .inputSchema(deleteProductInputSchema)
   .action(async ({ parsedInput: { id } }) => {
     const data = await prisma.product.findFirst({
@@ -25,6 +27,7 @@ export const deleteProductAction = authActionClient
       },
     });
 
+    revalidatePath('/', 'layout');
     if (data) {
       deleteFiles(data.images);
     }

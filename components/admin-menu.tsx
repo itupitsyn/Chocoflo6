@@ -1,6 +1,6 @@
 'use client';
 
-import { Menu } from 'lucide-react';
+import { CogIcon, ListCheckIcon, Menu, PlusIcon } from 'lucide-react';
 import Link from 'next/link';
 import { FC, useState } from 'react';
 
@@ -43,11 +43,22 @@ export const AdminMenu: FC<AdminMenuProps> = ({ opts }) => {
                 setIsAddDialogOpen(true);
               }}
             >
+              <PlusIcon />
               Добавить вкусни
             </DropdownMenuItem>
 
             <DropdownMenuItem asChild>
-              <Link href="/options">Опции</Link>
+              <Link href="/options">
+                <CogIcon />
+                Опции
+              </Link>
+            </DropdownMenuItem>
+
+            <DropdownMenuItem asChild>
+              <Link href="/orders">
+                <ListCheckIcon />
+                Заказы
+              </Link>
             </DropdownMenuItem>
           </DropdownMenuGroup>
         </DropdownMenuContent>

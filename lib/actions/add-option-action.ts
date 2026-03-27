@@ -1,12 +1,14 @@
 'use server';
 
+import { revalidatePath } from 'next/cache';
+
 import prisma from '@/prisma/prisma';
 
 import { addOptionInputSchema } from '../schemas/add-option-schema';
 import { saveImagesToFiles } from '../utils';
-import { authActionClient } from './safe-action';
+import { adminActionClient } from './safe-action';
 
-export const addOptionAction = authActionClient
+export const addOptionAction = adminActionClient
   .inputSchema(addOptionInputSchema)
   .action(async ({ parsedInput: { name, price, images } }) => {
     const fileNames: string[] = [];
@@ -27,5 +29,6 @@ export const addOptionAction = authActionClient
       },
     });
 
+    revalidatePath('/', 'layout');
     return { ...data, price: data.price.toNumber() };
   });

@@ -1,12 +1,14 @@
 'use server';
 
+import { revalidatePath } from 'next/cache';
+
 import prisma from '@/prisma/prisma';
 
 import { editOptionInputSchema } from '../schemas/edit-option-schema';
 import { normalizePrice, updateFiles } from '../utils';
-import { authActionClient } from './safe-action';
+import { adminActionClient } from './safe-action';
 
-export const editOptionAction = authActionClient
+export const editOptionAction = adminActionClient
   .inputSchema(editOptionInputSchema)
   .action(async ({ parsedInput: { name, price, id, images } }) => {
     const oldItem = await prisma.option.findFirst({
@@ -28,5 +30,6 @@ export const editOptionAction = authActionClient
       },
     });
 
+    revalidatePath('/', 'layout');
     return normalizePrice(data);
   });

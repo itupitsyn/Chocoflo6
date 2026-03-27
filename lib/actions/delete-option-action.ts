@@ -1,12 +1,14 @@
 'use server';
 
+import { revalidatePath } from 'next/cache';
+
 import prisma from '@/prisma/prisma';
 
 import { deleteOptionInputSchema } from '../schemas/delete-option-schema';
 import { deleteFiles } from '../utils';
-import { authActionClient } from './safe-action';
+import { adminActionClient } from './safe-action';
 
-export const deleteOptionAction = authActionClient
+export const deleteOptionAction = adminActionClient
   .inputSchema(deleteOptionInputSchema)
   .action(async ({ parsedInput: { id } }) => {
     const data = await prisma.option.findFirst({
@@ -25,6 +27,7 @@ export const deleteOptionAction = authActionClient
       },
     });
 
+    revalidatePath('/', 'layout');
     if (data) {
       deleteFiles(data.images);
     }

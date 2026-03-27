@@ -2,7 +2,6 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Plus } from 'lucide-react';
-import { useRouter } from 'next/navigation';
 import { FC, useCallback, useEffect, useState } from 'react';
 import { Controller, SubmitHandler, useFieldArray, useForm } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -29,7 +28,6 @@ import { Input } from '../ui/input';
 const FORM_ID = 'add-option-form';
 
 export const AddOptionForm: FC = () => {
-  const { refresh } = useRouter();
   const [isOpen, setIsOpen] = useState(false);
 
   const methods = useForm<z.infer<typeof addOptionInputSchema>>({
@@ -66,13 +64,12 @@ export const AddOptionForm: FC = () => {
         }
         setIsOpen(false);
         reset();
-        refresh();
       } catch (e) {
         console.error(e);
         toast.error('Неизвестная ошибка');
       }
     },
-    [refresh, reset],
+    [reset],
   );
 
   return (

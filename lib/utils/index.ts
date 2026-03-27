@@ -7,5 +7,6 @@ export * from './get-telegram-user';
 export * from './is-admin';
 export * from './normalize-price';
 export * from './save-images-to-files';
+export * from './telegram';
 export * from './telegram-auth';
 export * from './update-files';

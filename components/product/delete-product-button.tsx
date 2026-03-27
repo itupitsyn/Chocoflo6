@@ -1,7 +1,6 @@
 'use client';
 
 import { TrashIcon } from 'lucide-react';
-import { useRouter } from 'next/navigation';
 import { FC, useCallback } from 'react';
 import { toast } from 'sonner';
 
@@ -25,8 +24,6 @@ interface DeleteProductButtonProps {
 }
 
 export const DeleteProductButton: FC<DeleteProductButtonProps> = ({ id }) => {
-  const { refresh } = useRouter();
-
   const onDeleteClick = useCallback(async () => {
     try {
       const response = await deleteProductAction({ id });
@@ -35,13 +32,11 @@ export const DeleteProductButton: FC<DeleteProductButtonProps> = ({ id }) => {
         toast.error(response.serverError);
         return;
       }
-
-      refresh();
     } catch (e) {
       console.error(e);
       toast.error('Неизвестная ошибка');
     }
-  }, [id, refresh]);
+  }, [id]);
 
   return (
     <AlertDialog>

@@ -2,7 +2,6 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { EditIcon } from 'lucide-react';
-import { useRouter } from 'next/navigation';
 import { FC, useCallback, useEffect, useState } from 'react';
 import { Controller, SubmitHandler, useFieldArray, useForm } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -36,7 +35,6 @@ interface EditOptionFormProps {
 }
 
 export const EditOptionForm: FC<EditOptionFormProps> = ({ option }) => {
-  const { refresh } = useRouter();
   const [isOpen, setIsOpen] = useState(false);
 
   const methods = useForm<z.infer<typeof editOptionInputSchema>>({
@@ -78,13 +76,12 @@ export const EditOptionForm: FC<EditOptionFormProps> = ({ option }) => {
           });
         }
         setIsOpen(false);
-        refresh();
       } catch (e) {
         console.error(e);
         toast.error('Неизвестная ошибка');
       }
     },
-    [refresh, reset],
+    [reset],
   );
 
   useEffect(() => {
@@ -103,8 +100,8 @@ export const EditOptionForm: FC<EditOptionFormProps> = ({ option }) => {
 
       <DialogContent className="flex max-h-svh flex-col gap-4 overflow-hidden lg:max-w-lg">
         <DialogHeader>
-          <DialogTitle>Добавить вкусни</DialogTitle>
-          <DialogDescription>Добавьте новое вкуснически</DialogDescription>
+          <DialogTitle>Изменить дополнение</DialogTitle>
+          <DialogDescription>Отредактировать дополнение для вкуснически</DialogDescription>
         </DialogHeader>
 
         <form noValidate onSubmit={handleSubmit(onSubmit)} id={FORM_ID} className="min-h-0 shrink overflow-y-auto px-1">

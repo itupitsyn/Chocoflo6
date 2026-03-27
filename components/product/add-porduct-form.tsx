@@ -1,7 +1,7 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useRouter } from 'next/navigation';
+import { PlusIcon, TrashIcon } from 'lucide-react';
 import { FC, useCallback, useEffect } from 'react';
 import { Controller, SubmitHandler, useFieldArray, useForm } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -38,14 +38,13 @@ interface AddProductFormProps {
 }
 
 export const AddProductForm: FC<AddProductFormProps> = ({ isOpen, opts, onOpenChange }) => {
-  const { refresh } = useRouter();
-
   const methods = useForm<z.infer<typeof addProductInputSchema>>({
     defaultValues: {
       description: '',
       images: [],
       name: '',
       options: [],
+      variants: [{ name: 'Стандарт', price: 0 }],
     },
     resolver: zodResolver(addProductInputSchema),
   });
@@ -69,6 +68,12 @@ export const AddProductForm: FC<AddProductFormProps> = ({ isOpen, opts, onOpenCh
     fields: optFields,
   } = useFieldArray({ control, name: 'options', keyName: 'optId' });
 
+  const {
+    remove: varRemove,
+    insert: varInsert,
+    fields: varFields,
+  } = useFieldArray({ control, name: 'variants', keyName: 'varId' });
+
   const onSubmit: SubmitHandler<z.infer<typeof addProductInputSchema>> = useCallback(
     async (data) => {
       try {
@@ -80,13 +85,12 @@ export const AddProductForm: FC<AddProductFormProps> = ({ isOpen, opts, onOpenCh
         }
         onOpenChange(false);
         reset();
-        refresh();
       } catch (e) {
         console.error(e);
         toast.error('Неизвестная ошибка');
       }
     },
-    [refresh, reset, onOpenChange],
+    [reset, onOpenChange],
   );
 
   useEffect(() => {
@@ -127,7 +131,7 @@ export const AddProductForm: FC<AddProductFormProps> = ({ isOpen, opts, onOpenCh
               name="code"
               control={control}
               render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
+                <Field data-invalid={fieldState.invalid} className="gap-2">
                   <FieldLabel htmlFor={field.name}>Артикул</FieldLabel>
                   <Input
                     {...field}
@@ -166,12 +170,72 @@ export const AddProductForm: FC<AddProductFormProps> = ({ isOpen, opts, onOpenCh
               )}
             />
 
+            <FieldGroup className="gap-2! pt-4">
+              <FieldLabel>Доступные варианты</FieldLabel>
+
+              {varFields.map((variant, idx) => {
+                return (
+                  <Field key={variant.varId} orientation="horizontal" className="items-start">
+                    <Controller
+                      control={control}
+                      name={`variants.${idx}.name`}
+                      render={({ field, fieldState }) => (
+                        <Field>
+                          <Input {...field} placeholder="Имя" aria-invalid={fieldState.invalid} />
+                          {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                        </Field>
+                      )}
+                    />
+                    <Controller
+                      control={control}
+                      name={`variants.${idx}.price`}
+                      render={({ field, fieldState }) => (
+                        <Field>
+                          <Input
+                            type="number"
+                            {...field}
+                            value={field.value || ''}
+                            placeholder="Цена"
+                            aria-invalid={fieldState.invalid}
+                          />
+                          {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                        </Field>
+                      )}
+                    />
+                    <Button
+                      type="button"
+                      onClick={() => {
+                        varInsert(idx + 1, { name: '', price: 0 });
+                      }}
+                      size="icon-sm"
+                      variant="outline"
+                    >
+                      <PlusIcon />
+                    </Button>
+
+                    {varFields.length > 1 && (
+                      <Button
+                        type="button"
+                        onClick={() => {
+                          varRemove(idx);
+                        }}
+                        size="icon-sm"
+                        variant="destructive"
+                      >
+                        <TrashIcon />
+                      </Button>
+                    )}
+                  </Field>
+                );
+              })}
+            </FieldGroup>
+
             <Controller
               name="options"
               control={control}
               render={({ field }) => {
                 return (
-                  <FieldGroup className="gap-3! pt-4">
+                  <FieldGroup className="gap-2! pt-4">
                     <FieldLabel>Доступные опции</FieldLabel>
                     {opts.map((item) => {
                       const optIdx = optFields.findIndex((oItem) => oItem.id === item.id);
@@ -190,7 +254,9 @@ export const AddProductForm: FC<AddProductFormProps> = ({ isOpen, opts, onOpenCh
                               }
                             }}
                           />
-                          <Label htmlFor={item.id}>{item.name}</Label>
+                          <Label htmlFor={item.id} className="block min-w-0 overflow-hidden text-ellipsis">
+                            {item.name}
+                          </Label>
                         </Field>
                       );
                     })}

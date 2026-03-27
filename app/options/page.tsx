@@ -1,5 +1,4 @@
 import { ArrowLeft } from 'lucide-react';
-import { cookies } from 'next/headers';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
@@ -8,14 +7,12 @@ import { DeleteOptionButton } from '@/components/option/delete-option-button';
 import { EditOptionForm } from '@/components/option/edit-option-form';
 import { ImageSwiper } from '@/components/product/image-swiper';
 import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { TG_COOKIES } from '@/lib/constants/cookies';
-import { cn, formatPrice, isAdmin, normalizePrice } from '@/lib/utils';
+import { cn, formatPrice, normalizePrice } from '@/lib/utils';
+import { getServerUserData } from '@/lib/utils/get-server-user-data';
 import prisma from '@/prisma/prisma';
 
 export default async function Page() {
-  const cks = await cookies();
-  const initData = cks.get(TG_COOKIES)?.value;
-  const canEdit = isAdmin(initData);
+  const { canEdit } = await getServerUserData();
 
   if (!canEdit) {
     notFound();
@@ -24,6 +21,9 @@ export default async function Page() {
   const data = await prisma.option.findMany({
     where: {
       deletedAt: null,
+    },
+    orderBy: {
+      updatedAt: 'desc',
     },
   });
 
@@ -44,7 +44,7 @@ export default async function Page() {
         {data.map((item, idx, list) => (
           <Card key={item.id} className={cn(list.length < 2 && 'sm:max-w-1/2')}>
             <CardHeader>
-              <CardTitle>{item.name}</CardTitle>
+              <CardTitle className="overflow-hidden text-ellipsis">{item.name}</CardTitle>
 
               <CardAction>
                 <div className="flex gap-2">
