@@ -153,6 +153,18 @@ export default async function Page(params: PageParams) {
                   <ImageSwiper images={item.images} />
 
                   <p>{item.description}</p>
+
+                  {canEdit && !!variants.length && (
+                    <p className="overflow-hidden text-sm text-ellipsis opacity-70">
+                      Варианты: {variants.map((varItem) => varItem.name).join(', ')}
+                    </p>
+                  )}
+
+                  {canEdit && !!productOptions.length && (
+                    <p className="overflow-hidden text-sm text-ellipsis opacity-70">
+                      Доступные опции: {productOptions.map((optItem) => optItem.option.name).join(', ')}
+                    </p>
+                  )}
                 </div>
 
                 {isCustomer && (
@@ -160,6 +172,11 @@ export default async function Page(params: PageParams) {
                     opts={productOptions.map((po) => normalizePrice(po.option))}
                     product={product}
                     variants={variants.map(normalizePrice)}
+                    orderCount={
+                      order?.items.reduce<number>((prev, curr) => {
+                        return curr.product.id === item.id ? prev + curr.count : prev;
+                      }, 0) ?? 0
+                    }
                   />
                 )}
               </CardContent>

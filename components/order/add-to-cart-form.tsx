@@ -26,11 +26,12 @@ interface AddToCartFormProps {
   product: Product;
   opts: NormalizePrice<Option>[];
   variants: NormalizePrice<Variant>[];
+  orderCount: number;
 }
 
 type FormData = z.infer<typeof addToCartSchema>;
 
-export const AddToCartForm: FC<AddToCartFormProps> = ({ opts, product, variants }) => {
+export const AddToCartForm: FC<AddToCartFormProps> = ({ opts, product, variants, orderCount }) => {
   const id = useId();
 
   const methods = useForm<FormData>({
@@ -191,12 +192,17 @@ export const AddToCartForm: FC<AddToCartFormProps> = ({ opts, product, variants 
         )}
       </FieldGroup>
 
-      <div className="flex justify-end pt-4">
-        <Button onClick={handleSubmit(onSubmit)}>
-          <ShoppingBasketIcon />
+      <div className="flex items-center justify-end gap-4">
+        <div>
+          <div className="my-1 text-end text-sm opacity-70">
+            {orderCount ? `В корзине:\u00A0${orderCount}` : '\u00A0'}
+          </div>
+          <Button onClick={handleSubmit(onSubmit)}>
+            <ShoppingBasketIcon />
 
-          {formatPrice(fullPrice)}
-        </Button>
+            {formatPrice(fullPrice)}
+          </Button>
+        </div>
       </div>
     </form>
   );

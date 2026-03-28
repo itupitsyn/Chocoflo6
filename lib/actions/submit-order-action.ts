@@ -6,7 +6,6 @@ import prisma from '@/prisma/prisma';
 
 import { submitOrderSchema } from '../schemas/submit-order-schema';
 import { notifyAdmin } from '../utils';
-import { getOrderSum } from '../utils/get-order-sum';
 import { authActionClient } from './safe-action';
 
 export const submitOrderAction = authActionClient
@@ -45,9 +44,7 @@ export const submitOrderAction = authActionClient
         },
       });
 
-      const price = await getOrderSum(order);
-
-      notifyAdmin(orderId, price.toNumber(), user);
+      notifyAdmin(order, user);
     });
 
     redirect('/orders');

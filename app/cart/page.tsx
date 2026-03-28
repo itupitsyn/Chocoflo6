@@ -53,6 +53,7 @@ export default async function Page() {
                   item.opts.forEach((opt) => {
                     price = price.add(opt.price);
                   });
+                  price = price.mul(item.count);
 
                   return (
                     <TableRow key={item.id}>
