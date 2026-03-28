@@ -3,6 +3,14 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
 import { OrderActions } from '@/components/order/order-actions';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { statusLabels } from '@/lib/constants/orders';
 import { TgUser } from '@/lib/types';
@@ -156,7 +164,35 @@ const AdminPage = async () => {
                       <TableCell>{order.id}</TableCell>
                       <TableCell>{order.createdAt.toLocaleString('ru-RU')}</TableCell>
                       <TableCell className="max-w-[300px] overflow-hidden text-ellipsis">
-                        {order.orderItems.map((item) => item.product.name).join(', ')}
+                        <Dialog>
+                          <DialogTrigger>{order.orderItems.map((item) => item.product.name).join(', ')}</DialogTrigger>
+
+                          <DialogContent>
+                            <DialogHeader>
+                              <DialogTitle>
+                                Заказ {order.id} от {order.createdAt.toLocaleString('ru-RU')}
+                              </DialogTitle>
+                              <DialogDescription>Состав заказа</DialogDescription>
+                            </DialogHeader>
+
+                            <ul className="flex flex-col gap-2 overflow-hidden">
+                              {order.orderItems.map((item) => (
+                                <li key={item.id} className="overflow-hidden text-ellipsis">
+                                  {`${item.product.name} — ${item.variant.name}`}
+                                  {!!item.orderItemOptions.length && (
+                                    <ul className="overflow-hidden pl-4 text-sm opacity-70">
+                                      {item.orderItemOptions.map((itemOpt) => (
+                                        <li key={itemOpt.optionId} className="overflow-hidden text-ellipsis">
+                                          {itemOpt.option.name}
+                                        </li>
+                                      ))}
+                                    </ul>
+                                  )}
+                                </li>
+                              ))}
+                            </ul>
+                          </DialogContent>
+                        </Dialog>
                       </TableCell>
 
                       <TableCell>
