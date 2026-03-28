@@ -1,7 +1,6 @@
 'use client';
 
 import { EyeClosedIcon, EyeIcon } from 'lucide-react';
-import { useRouter } from 'next/navigation';
 import { FC, useCallback } from 'react';
 import { toast } from 'sonner';
 
@@ -17,8 +16,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from './ui/alert-dialog';
-import { Button } from './ui/button';
+} from '../ui/alert-dialog';
+import { Button } from '../ui/button';
 
 interface ChangeProductVisibilityButtonProps {
   id: string;
@@ -26,8 +25,6 @@ interface ChangeProductVisibilityButtonProps {
 }
 
 export const ChangeProductVisibilityButton: FC<ChangeProductVisibilityButtonProps> = ({ id, isPublished }) => {
-  const { refresh } = useRouter();
-
   const onChangeVisibility = useCallback(async () => {
     try {
       const response = await changeProductVisibilityAction({ id, isHidden: isPublished });
@@ -36,13 +33,11 @@ export const ChangeProductVisibilityButton: FC<ChangeProductVisibilityButtonProp
         toast.error(response.serverError);
         return;
       }
-
-      refresh();
     } catch (e) {
       console.error(e);
       toast.error('Неизвестная ошибка');
     }
-  }, [id, isPublished, refresh]);
+  }, [id, isPublished]);
 
   return (
     <AlertDialog>

@@ -1,14 +1,16 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { PlusIcon } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import { useCallback, useEffect, useState } from 'react';
+import { Plus } from 'lucide-react';
+import { FC, useCallback, useEffect, useState } from 'react';
 import { Controller, SubmitHandler, useFieldArray, useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import z from 'zod';
 
-import { Button } from '@/components/ui/button';
+import { addOptionAction } from '@/lib/actions/add-option-action';
+import { addOptionInputSchema } from '@/lib/schemas/add-option-schema';
+
+import { Button } from '../ui/button';
 import {
   Dialog,
   DialogClose,
@@ -18,28 +20,22 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/dialog';
-import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field';
-import { Input } from '@/components/ui/input';
-import { addProductAction } from '@/lib/actions/add-product-action';
-import { addProductInputSchema } from '@/lib/schemas/add-product-schema';
+} from '../ui/dialog';
+import { Field, FieldError, FieldGroup, FieldLabel } from '../ui/field';
+import { ImageUploader } from '../ui/image-uploader';
+import { Input } from '../ui/input';
 
-import { ImageUploader } from './ui/image-uploader';
-import { InputGroup, InputGroupAddon, InputGroupText, InputGroupTextarea } from './ui/input-group';
+const FORM_ID = 'add-option-form';
 
-const FORM_ID = 'add-product-form';
-
-export function AddProductForm() {
-  const { refresh } = useRouter();
+export const AddOptionForm: FC = () => {
   const [isOpen, setIsOpen] = useState(false);
 
-  const methods = useForm<z.infer<typeof addProductInputSchema>>({
+  const methods = useForm<z.infer<typeof addOptionInputSchema>>({
     defaultValues: {
-      description: '',
-      images: [],
       name: '',
+      images: [],
     },
-    resolver: zodResolver(addProductInputSchema),
+    resolver: zodResolver(addOptionInputSchema),
   });
 
   const {
@@ -51,10 +47,16 @@ export function AddProductForm() {
 
   const { append, remove, fields: imgFields } = useFieldArray({ control, name: 'images', keyName: 'id' });
 
-  const onSubmit: SubmitHandler<z.infer<typeof addProductInputSchema>> = useCallback(
+  useEffect(() => {
+    if (!isOpen) {
+      reset();
+    }
+  }, [isOpen, reset]);
+
+  const onSubmit: SubmitHandler<z.infer<typeof addOptionInputSchema>> = useCallback(
     async (data) => {
       try {
-        const response = await addProductAction(data);
+        const response = await addOptionAction(data);
         if (response.serverError) {
           console.error(response.serverError);
           toast.error(response.serverError);
@@ -62,36 +64,29 @@ export function AddProductForm() {
         }
         setIsOpen(false);
         reset();
-        refresh();
       } catch (e) {
         console.error(e);
         toast.error('Неизвестная ошибка');
       }
     },
-    [refresh, reset],
+    [reset],
   );
-
-  useEffect(() => {
-    if (!isOpen) {
-      reset();
-    }
-  }, [isOpen, reset]);
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" size="icon-lg">
-          <PlusIcon />
+        <Button variant="outline" size="icon-sm">
+          <Plus />
         </Button>
       </DialogTrigger>
 
       <DialogContent className="flex max-h-svh flex-col gap-4 overflow-hidden lg:max-w-lg">
         <DialogHeader>
-          <DialogTitle>Добавить вкусни</DialogTitle>
-          <DialogDescription>Добавьте новое вкуснически</DialogDescription>
+          <DialogTitle>Добавить дополнение</DialogTitle>
+          <DialogDescription />
         </DialogHeader>
 
-        <form noValidate onSubmit={handleSubmit(onSubmit)} id={FORM_ID} className="min-h-0 shrink overflow-y-auto px-1">
+        <form noValidate onSubmit={handleSubmit(onSubmit)} id={FORM_ID} className="min-h-0 shrink overflow-y-auto p-1">
           <FieldGroup className="gap-3">
             <Controller
               name="name"
@@ -103,7 +98,7 @@ export function AddProductForm() {
                     {...field}
                     id={field.name}
                     aria-invalid={fieldState.invalid}
-                    placeholder="Название вкусни"
+                    placeholder="Название"
                     autoComplete="off"
                   />
                   {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
@@ -112,24 +107,20 @@ export function AddProductForm() {
             />
 
             <Controller
-              name="description"
+              name="price"
               control={control}
               render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid} className="gap-2">
-                  <FieldLabel htmlFor={field.name}>Описание</FieldLabel>
-                  <InputGroup>
-                    <InputGroupTextarea
-                      {...field}
-                      id={field.name}
-                      placeholder="Описание вкусни"
-                      rows={6}
-                      className="min-h-24 resize-none"
-                      aria-invalid={fieldState.invalid}
-                    />
-                    <InputGroupAddon align="block-end">
-                      <InputGroupText className="tabular-nums">{field.value.length}/1024</InputGroupText>
-                    </InputGroupAddon>
-                  </InputGroup>
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel htmlFor={field.name}>Цена</FieldLabel>
+                  <Input
+                    {...field}
+                    value={field.value || ''}
+                    type="number"
+                    id={field.name}
+                    aria-invalid={fieldState.invalid}
+                    placeholder="Цена"
+                    autoComplete="off"
+                  />
                   {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                 </Field>
               )}
@@ -174,10 +165,10 @@ export function AddProductForm() {
             <Button variant="outline">Отмена</Button>
           </DialogClose>
           <Button form={FORM_ID} disabled={isSubmitting} type="submit">
-            Добавить
+            Сохранить
           </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
-}
+};

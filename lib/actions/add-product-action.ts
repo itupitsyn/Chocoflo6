@@ -1,14 +1,16 @@
 'use server';
 
+import { revalidatePath } from 'next/cache';
+
 import prisma from '@/prisma/prisma';
 
 import { addProductInputSchema } from '../schemas/add-product-schema';
 import { saveImagesToFiles } from '../utils';
-import { authActionClient } from './safe-action';
+import { adminActionClient } from './safe-action';
 
-export const addProductAction = authActionClient
+export const addProductAction = adminActionClient
   .inputSchema(addProductInputSchema)
-  .action(async ({ parsedInput: { description, name, images } }) => {
+  .action(async ({ parsedInput: { description, name, images, options, code, variants } }) => {
     const fileNames: string[] = [];
     if (images?.length) {
       const result = await saveImagesToFiles(images?.map((item) => item.file));
@@ -23,9 +25,17 @@ export const addProductAction = authActionClient
       data: {
         name,
         description,
+        code,
+        productOptions: {
+          create: options?.map((item) => ({ optionId: item.id })),
+        },
+        variants: {
+          create: variants,
+        },
         images: fileNames,
       },
     });
 
+    revalidatePath('/', 'layout');
     return data;
   });

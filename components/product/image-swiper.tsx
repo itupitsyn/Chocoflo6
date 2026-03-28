@@ -4,33 +4,8 @@ import useEmblaCarousel from 'embla-carousel-react';
 import { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 
-import { cn } from '@/lib/utils';
-
+import { CarouselNavigation } from '../ui/carousel-navigation';
 import { ImgSlide } from './image-slide';
-
-interface NavigationProps {
-  images: string[];
-  selectedIndex: number;
-  scrollTo: (idx: number) => void;
-}
-
-const Navigation: FC<NavigationProps> = ({ images, selectedIndex, scrollTo }) => {
-  return (
-    <div className="absolute right-0 bottom-4 left-0 flex justify-center gap-2">
-      {images.map((_, index) => (
-        <button
-          key={index}
-          onClick={() => scrollTo(index)}
-          className={cn(
-            'h-2 rounded-full transition-all duration-300',
-            index === selectedIndex ? 'w-6 bg-fuchsia-700 shadow-md' : 'w-2 bg-fuchsia-700/50',
-          )}
-          aria-label={`Go to slide ${index + 1}`}
-        />
-      ))}
-    </div>
-  );
-};
 
 interface ImageSwiperFSProps {
   images: string[];
@@ -92,7 +67,7 @@ const ImageSwiperFS: FC<ImageSwiperFSProps> = ({ images, startIndex, onClick }) 
           </div>
         </div>
 
-        {images.length > 1 && <Navigation images={images} scrollTo={scrollTo} selectedIndex={selectedIndex} />}
+        {images.length > 1 && <CarouselNavigation images={images} scrollTo={scrollTo} selectedIndex={selectedIndex} />}
       </div>
     </div>,
     document.body,
@@ -184,7 +159,7 @@ export const ImageSwiper: FC<ImageSwiperProps> = ({ images }) => {
         </div>
 
         {imgsNormalized.length > 1 && (
-          <Navigation images={imgsNormalized} scrollTo={scrollTo} selectedIndex={selectedIndex} />
+          <CarouselNavigation images={imgsNormalized} scrollTo={scrollTo} selectedIndex={selectedIndex} />
         )}
       </div>
 

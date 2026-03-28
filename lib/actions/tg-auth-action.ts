@@ -1,5 +1,6 @@
 'use server';
 
+import { revalidatePath } from 'next/cache';
 import z from 'zod';
 
 import { isAdmin as isAdminChecker, verifyTelegramAuth } from '../utils';
@@ -14,6 +15,7 @@ export const tgAuthAction = actionClient.inputSchema(inputSchema).action(async (
     const isOk = await verifyTelegramAuth(initData);
     const isAdmin = isOk ? isAdminChecker(initData) : false;
 
+    revalidatePath('/', 'layout');
     return { isOk, isAdmin };
   } catch (error) {
     console.error(error);

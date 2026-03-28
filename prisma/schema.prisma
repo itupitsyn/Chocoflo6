@@ -15,16 +15,20 @@ datasource db {
 
 model Product {
   id          String   @id @default(cuid())
+  code        String?
   name        String
   description String?  @db.Text
   images      String[]
 
   isPublished Boolean @default(true)
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
 
-  variants Variant[]
+  variants       Variant[]
+  productOptions ProductOption[]
+  orderItems     OrderItem[]
 }
 
 model Variant {
@@ -35,6 +39,92 @@ model Variant {
   product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
   productId String
 
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  orderItems OrderItem[]
+}
+
+model ProductOption {
+  productId String
+  optionId  String
+  product   Product @relation(fields: [productId], references: [id])
+  option    Option  @relation(fields: [optionId], references: [id])
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@id([productId, optionId])
+}
+
+model Option {
+  id     String   @id @default(cuid())
+  name   String
+  price  Decimal  @db.Decimal(10, 2)
+  images String[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  products         ProductOption[]
+  orderItemOptions OrderItemOption[]
+}
+
+enum OrderStatus {
+  CART // Просто корзина (черновик)
+  PENDING // Ожидает оплаты/подтверждения
+  PROCESSING // Клубничку уже макают в шоколад 🍓🍫
+  SHIPPING // Курьер в пути
+  COMPLETED // Вкусно съедено
+  CANCELLED // Отменено
+}
+
+model User {
+  id       BigInt @id
+  name     String
+  userName String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  orders    Order[]
+}
+
+model Order {
+  id     Int         @id @default(autoincrement())
+  user   User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId BigInt
+  status OrderStatus @default(CART)
+
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  orderItems OrderItem[]
+}
+
+model OrderItem {
+  id      String @id @default(cuid())
+  order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderId Int
+
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId String
+
+  variant   Variant @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  variantId String
+
+  count            Int
+  orderItemOptions OrderItemOption[]
+}
+
+model OrderItemOption {
+  orderItemId String
+  optionId    String
+  orderItem   OrderItem @relation(fields: [orderItemId], references: [id], onDelete: Cascade)
+  option      Option    @relation(fields: [optionId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@id([orderItemId, optionId])
 }

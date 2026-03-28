@@ -2,7 +2,6 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { EditIcon } from 'lucide-react';
-import { useRouter } from 'next/navigation';
 import { FC, useCallback, useEffect, useState } from 'react';
 import { Controller, SubmitHandler, useFieldArray, useForm } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -21,32 +20,31 @@ import {
 } from '@/components/ui/dialog';
 import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
-import { editProductAction } from '@/lib/actions/edit-product-action';
-import { Product } from '@/lib/generated/prisma/client';
-import { editProductInputSchema } from '@/lib/schemas/edit-product-schema';
+import { editOptionAction } from '@/lib/actions/edit-option-action';
+import { Option } from '@/lib/generated/prisma/client';
+import { editOptionInputSchema } from '@/lib/schemas/edit-option-schema';
+import { NormalizePrice } from '@/lib/types';
 import { getImageUrl } from '@/lib/utils';
 
-import { ImageUploader } from './ui/image-uploader';
-import { InputGroup, InputGroupAddon, InputGroupText, InputGroupTextarea } from './ui/input-group';
+import { ImageUploader } from '../ui/image-uploader';
 
-const FORM_ID = 'edit-product-form';
+const FORM_ID = 'edit-option-form';
 
-interface EditProductFormProps {
-  product: Pick<Product, 'id' | 'name' | 'images' | 'description'>;
+interface EditOptionFormProps {
+  option: NormalizePrice<Option>;
 }
 
-export const EditProductForm: FC<EditProductFormProps> = ({ product }) => {
-  const { refresh } = useRouter();
+export const EditOptionForm: FC<EditOptionFormProps> = ({ option }) => {
   const [isOpen, setIsOpen] = useState(false);
 
-  const methods = useForm<z.infer<typeof editProductInputSchema>>({
+  const methods = useForm<z.infer<typeof editOptionInputSchema>>({
     defaultValues: {
-      id: product.id,
-      description: product.description || '',
-      images: product.images.map((item, idx) => ({ id: idx + 1, src: item, uploaded: true })),
-      name: product.name,
+      id: option.id,
+      price: option.price,
+      images: option.images.map((item, idx) => ({ id: idx + 1, src: item, uploaded: true })),
+      name: option.name,
     },
-    resolver: zodResolver(editProductInputSchema),
+    resolver: zodResolver(editOptionInputSchema),
   });
 
   const {
@@ -58,10 +56,10 @@ export const EditProductForm: FC<EditProductFormProps> = ({ product }) => {
 
   const { append, remove, fields: imgFields } = useFieldArray({ control, name: 'images', keyName: 'id' });
 
-  const onSubmit: SubmitHandler<z.infer<typeof editProductInputSchema>> = useCallback(
+  const onSubmit: SubmitHandler<z.infer<typeof editOptionInputSchema>> = useCallback(
     async (data) => {
       try {
-        const response = await editProductAction(data);
+        const response = await editOptionAction(data);
         if (response.serverError) {
           console.error(response.serverError);
           toast.error(response.serverError);
@@ -72,19 +70,18 @@ export const EditProductForm: FC<EditProductFormProps> = ({ product }) => {
         if (newData) {
           reset({
             id: newData.id,
-            description: newData.description || '',
+            price: newData.price,
             images: newData.images.map((item, idx) => ({ id: idx + 1, src: item, uploaded: true })),
             name: newData.name,
           });
         }
         setIsOpen(false);
-        refresh();
       } catch (e) {
         console.error(e);
         toast.error('Неизвестная ошибка');
       }
     },
-    [refresh, reset],
+    [reset],
   );
 
   useEffect(() => {
@@ -103,8 +100,8 @@ export const EditProductForm: FC<EditProductFormProps> = ({ product }) => {
 
       <DialogContent className="flex max-h-svh flex-col gap-4 overflow-hidden lg:max-w-lg">
         <DialogHeader>
-          <DialogTitle>Добавить вкусни</DialogTitle>
-          <DialogDescription>Добавьте новое вкуснически</DialogDescription>
+          <DialogTitle>Изменить дополнение</DialogTitle>
+          <DialogDescription>Отредактировать дополнение для вкуснически</DialogDescription>
         </DialogHeader>
 
         <form noValidate onSubmit={handleSubmit(onSubmit)} id={FORM_ID} className="min-h-0 shrink overflow-y-auto px-1">
@@ -128,24 +125,20 @@ export const EditProductForm: FC<EditProductFormProps> = ({ product }) => {
             />
 
             <Controller
-              name="description"
+              name="price"
               control={control}
               render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid} className="gap-2">
-                  <FieldLabel htmlFor={field.name}>Описание</FieldLabel>
-                  <InputGroup>
-                    <InputGroupTextarea
-                      {...field}
-                      id={field.name}
-                      placeholder="Описание вкусни"
-                      rows={6}
-                      className="min-h-24 resize-none"
-                      aria-invalid={fieldState.invalid}
-                    />
-                    <InputGroupAddon align="block-end">
-                      <InputGroupText className="tabular-nums">{field.value.length}/1024</InputGroupText>
-                    </InputGroupAddon>
-                  </InputGroup>
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel htmlFor={field.name}>Цена</FieldLabel>
+                  <Input
+                    {...field}
+                    value={field.value || ''}
+                    type="number"
+                    id={field.name}
+                    aria-invalid={fieldState.invalid}
+                    placeholder="Цена"
+                    autoComplete="off"
+                  />
                   {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                 </Field>
               )}

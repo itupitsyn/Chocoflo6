@@ -1,11 +1,13 @@
 'use server';
 
+import { revalidatePath } from 'next/cache';
+
 import prisma from '@/prisma/prisma';
 
 import { changeProductVisibilityInputSchema } from '../schemas/change-product-visibility-schema';
-import { authActionClient } from './safe-action';
+import { adminActionClient } from './safe-action';
 
-export const changeProductVisibilityAction = authActionClient
+export const changeProductVisibilityAction = adminActionClient
   .inputSchema(changeProductVisibilityInputSchema)
   .action(async ({ parsedInput: { id, isHidden } }) => {
     const data = await prisma.product.update({
@@ -17,5 +19,6 @@ export const changeProductVisibilityAction = authActionClient
       },
     });
 
+    revalidatePath('/', 'layout');
     return data;
   });
