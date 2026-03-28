@@ -8,7 +8,7 @@ import { toast } from 'sonner';
 
 import { IMG_FORMATS } from '@/lib/constants/images';
 
-import { Loader } from '../loader';
+import { Loader } from './loader';
 
 export type ImageUploaderElement = { id: number; src: string; file?: File; uploaded: boolean };
 

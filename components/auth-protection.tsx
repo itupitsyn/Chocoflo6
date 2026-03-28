@@ -2,7 +2,7 @@
 
 import { FC, PropsWithChildren } from 'react';
 
-import { Loader } from './loader';
+import { Loader } from './ui/loader';
 import { useTgContext } from './tg-provider';
 
 export const AuthProtection: FC<PropsWithChildren> = ({ children }) => {

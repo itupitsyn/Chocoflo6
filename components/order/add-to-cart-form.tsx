@@ -15,10 +15,12 @@ import { variantSchema } from '@/lib/schemas/variant-schema';
 import { NormalizePrice } from '@/lib/types';
 import { formatPrice, getSelectClassNames } from '@/lib/utils';
 
-import { Button } from './ui/button';
-import { Checkbox } from './ui/checkbox';
-import { Field, FieldGroup, FieldLabel } from './ui/field';
-import { Label } from './ui/label';
+import { OptionImgSwiper } from '../option/option-img-swiper';
+import { Button } from '../ui/button';
+import { Checkbox } from '../ui/checkbox';
+import { Field, FieldGroup, FieldLabel } from '../ui/field';
+import { Label } from '../ui/label';
+import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 
 interface AddToCartFormProps {
   product: Product;
@@ -165,10 +167,16 @@ export const AddToCartForm: FC<AddToCartFormProps> = ({ opts, product, variants 
                           }}
                         />
                         <Label htmlFor={`${product.id}-${item.id}`} className="overflow-hidden">
-                          <span className="flex overflow-hidden text-ellipsis">
-                            <span className="min-w-0 overflow-hidden text-ellipsis">{item.name}</span>
-                            <span>:</span>
-                          </span>
+                          <Popover>
+                            <PopoverTrigger className="flex overflow-hidden text-ellipsis">
+                              <span className="min-w-0 overflow-hidden text-ellipsis">{item.name}</span>
+                              <span>:</span>
+                            </PopoverTrigger>
+                            <PopoverContent align="start">
+                              <h3 className="mb-2 overflow-hidden text-xl font-semibold text-ellipsis">{item.name}</h3>
+                              <OptionImgSwiper images={item.images} />
+                            </PopoverContent>
+                          </Popover>
                           <span className="font-light text-black/70">
                             {`${isChecked ? '+' : ''}${formatPrice(item.price)}`}
                           </span>

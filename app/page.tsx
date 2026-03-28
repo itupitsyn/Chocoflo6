@@ -1,9 +1,9 @@
 import { ShoppingBasketIcon } from 'lucide-react';
 import Link from 'next/link';
 
-import { AddToCartForm } from '@/components/add-to-cart-form';
 import { AdminMenu } from '@/components/admin-menu';
 import { CustomerMenu } from '@/components/customer-menu';
+import { AddToCartForm } from '@/components/order/add-to-cart-form';
 import { ChangeProductVisibilityButton } from '@/components/product/change-product-visibility-button';
 import { DeleteProductButton } from '@/components/product/delete-product-button';
 import { EditProductForm } from '@/components/product/edit-product-form';

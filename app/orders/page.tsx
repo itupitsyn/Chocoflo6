@@ -5,7 +5,6 @@ import { notFound } from 'next/navigation';
 import { OrderActions } from '@/components/order/order-actions';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { statusLabels } from '@/lib/constants/orders';
-import { User } from '@/lib/generated/prisma/client';
 import { TgUser } from '@/lib/types';
 import { formatPrice } from '@/lib/utils';
 import { getOrderSum } from '@/lib/utils/get-order-sum';
@@ -78,7 +77,7 @@ const CustomerPage = async (user: TgUser) => {
                         {order.orderItems.map((item) => item.product.name).join(', ')}
                       </TableCell>
                       <TableCell>{formatPrice(price.toNumber())}</TableCell>
-                      <TableCell>{order.status}</TableCell>
+                      <TableCell>{statusLabels[order.status]}</TableCell>
                     </TableRow>
                   );
                 })}
@@ -123,7 +122,7 @@ const AdminPage = async () => {
         <Link href="/" className="pt-2 transition-opacity hover:opacity-70">
           <ArrowLeft />
         </Link>
-        <h1 className="text-3xl font-bold lg:text-5xl">Мои заказы</h1>
+        <h1 className="text-3xl font-bold lg:text-5xl">Заказы</h1>
       </div>
 
       <div className="pt-10">
